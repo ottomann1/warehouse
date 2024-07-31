@@ -30,7 +30,7 @@ router.post("/car", async (req: Request, res: Response) => {
 
   if (!newCar[0]) {
     logger.error("Failed to insert new car record");
-    return res.status(500).json({ message: "Failed to process request" });
+    return res.sendStatus(500);
   } else if (newCar[0].status === "pending") {
     logger.info({ message: "car success", newCar });
     return res
