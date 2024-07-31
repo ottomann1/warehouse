@@ -19,16 +19,19 @@ router.get("/status", (req: Request, res: Response) => {
 });
 
 router.post("/car", async (req: Request, res: Response) => {
-  logger.info(req.body);
   const newId = req.body.carId;
   const newStatus = "pending";
+
+  logger.info({ message: "warehouse received", newId });
   const newCar = await db
     .insert(carTable)
     .values({ id: newId, status: newStatus })
     .returning();
-  if (!newCar) {
+  if (!newCar[0]) {
+    logger.info("newcarerror");
     res.status(500);
-  } else {
+  } else if (newCar[0].status === "pending") {
+    logger.info({ message: "car success", newCar });
     res.status(200);
   }
 });
