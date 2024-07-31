@@ -27,12 +27,15 @@ router.post("/car", async (req: Request, res: Response) => {
     .insert(carTable)
     .values({ id: newId, status: newStatus })
     .returning();
+
   if (!newCar[0]) {
-    logger.info("newcarerror");
-    res.status(500).send();
+    logger.error("Failed to insert new car record");
+    return res.status(500).json({ message: "Failed to process request" });
   } else if (newCar[0].status === "pending") {
     logger.info({ message: "car success", newCar });
-    res.status(200).send();
+    return res
+      .status(200)
+      .json({ message: "Car record created successfully", newCar });
   }
 });
 
