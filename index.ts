@@ -29,10 +29,10 @@ router.post("/car", async (req: Request, res: Response) => {
     .returning();
   if (!newCar[0]) {
     logger.info("newcarerror");
-    res.status(500);
+    res.status(500).send();
   } else if (newCar[0].status === "pending") {
     logger.info({ message: "car success", newCar });
-    res.status(200);
+    res.status(200).send();
   }
 });
 
