@@ -1,5 +1,6 @@
 import express, { Request, Response, NextFunction } from "express";
 import logger from "./logger";
+import { carTable, db } from "./drizzle";
 
 const app = express();
 const router = express.Router();
@@ -17,28 +18,19 @@ router.get("/status", (req: Request, res: Response) => {
   res.status(200).send();
 });
 
-app.post("/payments", (req: Request, res: Response) => {
-  const { carId, amount } = req.body;
-  logger.info({ message: "info", carId, amount });
-  logger.warn({ message: "warning ", carId, amount });
-  if (typeof amount !== "number" || !Number.isInteger(amount)) {
-    logger.log({
-      message: "Invalid amount. It must be an integer.",
-      level: "error",
-    });
-    return res
-      .status(400)
-      .json({ error: "Invalid amount. It must be an integer." });
+router.post("/car", async (req: Request, res: Response) => {
+  logger.info(req.body);
+  const newId = req.body.carId;
+  const newStatus = "pending";
+  const newCar = await db
+    .insert(carTable)
+    .values({ id: newId, status: newStatus })
+    .returning();
+  if (!newCar) {
+    res.status(500);
+  } else {
+    res.status(200);
   }
-  logger.info({
-    level: "info",
-    message: "Payment processed successfully",
-    carId,
-    amount,
-  });
-  res
-    .status(201)
-    .json({ message: "Payment processed successfully", carId, amount });
 });
 
 app.use("/", router);

@@ -10,7 +10,7 @@ import {
 import { uuid } from "drizzle-orm/pg-core";
 export const db = drizzle(sql);
 
-export const carsTable = pgTable("cars", {
+export const carTable = pgTable("car", {
   id: uuid("id").primaryKey(),
   status: text("status").notNull(),
 });
