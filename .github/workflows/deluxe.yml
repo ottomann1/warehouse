@@ -5,22 +5,13 @@ on: [push, pull_request]
 jobs:
   build:
     runs-on: ubuntu-latest
-    services:
-      meilisearch:
-        image: getmeili/meilisearch:latest
-        ports:
-          - 7700:7700
-        env:
-          MEILI_MASTER_KEY: ${{ secrets.MEILISEARCH_API_KEY }}
-
-      meilisync:
-        image: long2ice/meilisync:latest
-        options: >-
-          --mount type=bind,source=${{ github.workspace }}/.github/workflows/config.yml,target=/meilisync/config.yml,readonly
-
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
+
+      # Verify that the workflow directory contains the files we need
+      - name: List Workflow Directory
+        run: ls -al .github/workflows/
 
       - name: Authenticate to Google Cloud
         uses: google-github-actions/auth@v2.1.3
@@ -49,3 +40,16 @@ jobs:
         run: |
           curl http://localhost:7700/health
           curl -X GET 'http://localhost:7700/indexes' -H "Authorization: Bearer ${{ secrets.MEILISEARCH_API_KEY }}"
+
+    services:
+      meilisearch:
+        image: getmeili/meilisearch:latest
+        ports:
+          - 7700:7700
+        env:
+          MEILI_MASTER_KEY: ${{ secrets.MEILISEARCH_API_KEY }}
+
+      meilisync:
+        image: long2ice/meilisync:latest
+        options: >-
+          --mount type=bind,source=${{ github.workspace }}/.github/workflows/config.yml,target=/meilisync/config.yml,readonly
