@@ -21,24 +21,25 @@ router.get("/status", (req: Request, res: Response) => {
 router.post("/car", async (req: Request, res: Response) => {
   const newId = req.body.carId;
   const newStatus = "pending";
+  await db.transaction(async (tx) => {
+    logger.info({ message: "warehouse received", newId });
+    const newCar = await tx
+      .insert(carTable)
+      .values({ id: newId, status: newStatus })
+      .returning();
 
-  logger.info({ message: "warehouse received", newId });
-  const newCar = await db
-    .insert(carTable)
-    .values({ id: newId, status: newStatus })
-    .returning();
-
-  if (!newCar[0]) {
-    logger.error("Failed to insert new car record");
-    return res.sendStatus(500);
-  } else if (newCar[0].status === "pending") {
-    logger.info({ message: "car success", newCar });
-    return res
-      .status(200)
-      .json({ message: "Car record created successfully", newCar });
-  }
+    if (!newCar[0]) {
+      await tx.rollback();
+      logger.error("Failed to insert new car record");
+      return res.sendStatus(500);
+    } else if (newCar[0].status === "pending") {
+      logger.info({ message: "car success", newCar });
+      return res
+        .status(200)
+        .json({ message: "Car record created successfully", newCar });
+    }
+  });
 });
-
 app.use("/", router);
 
 app.listen(port, () => {
