@@ -7,7 +7,7 @@ jobs:
       meilisync:
         image: long2ice/meilisync
         volumes:
-          - ./config.yml:/meilisync/config.yml
+          - ./config.yml
           
     steps:
       - uses: actions/checkout@v4
