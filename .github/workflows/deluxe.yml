@@ -1,66 +1,29 @@
-name: Build and Deploy
-
+name: Authenticate to Google Cloud
 on: [push, pull_request]
-
 jobs:
   build:
     runs-on: ubuntu-latest
-    steps:
-      - name: Check out repository
-        uses: actions/checkout@v4
-
-      # Inject secrets into the configuration file
-      - name: Inject secrets into config.yml
-        run: |
-          sed -i 's|YOUR_MEILISEARCH_API_KEY|'"${MEILISEARCH_API_KEY}"'|g' .github/workflows/config.yml
-          sed -i 's|YOUR_POSTGRES_HOST|'"${POSTGRES_HOST}"'|g' .github/workflows/config.yml
-          sed -i 's|YOUR_POSTGRESQL_DATABASE_NAME|'"${POSTGRESQL_DATABASE_NAME}"'|g' .github/workflows/config.yml
-          sed -i 's|YOUR_POSTGRESQL_USERNAME|'"${POSTGRESQL_USERNAME}"'|g' .github/workflows/config.yml
-          sed -i 's|YOUR_POSTGRESQL_PASSWORD|'"${POSTGRESQL_PASSWORD}"'|g' .github/workflows/config.yml
-        env:
-          MEILISEARCH_API_KEY: ${{ secrets.MEILISEARCH_API_KEY }}
-          POSTGRES_HOST: ${{ secrets.POSTGRES_HOST }}
-          POSTGRESQL_DATABASE_NAME: ${{ secrets.POSTGRESQL_DATABASE_NAME }}
-          POSTGRESQL_USERNAME: ${{ secrets.POSTGRESQL_USERNAME }}
-          POSTGRESQL_PASSWORD: ${{ secrets.POSTGRESQL_PASSWORD }}
-
-      - name: Authenticate to Google Cloud
-        uses: google-github-actions/auth@v2.1.3
-        with:
-          credentials_json: ${{ secrets.SECRETDELUXE }}
-
-      - name: Set up Cloud SDK
-        uses: google-github-actions/setup-gcloud@v2
-
-      - name: Use gcloud CLI
-        run: gcloud info
-
-      - name: Set region for Cloud Run
-        run: gcloud config set run/region us-central1
-
-      - name: Run warehouseapp
-        run: gcloud run deploy warehouseapp --source . --allow-unauthenticated
-
-      - name: Check Meilisync Logs
-        run: docker logs ${{ job.services.meilisync.id }}
-
-      - name: Check Meilisearch Logs
-        run: docker logs ${{ job.services.meilisearch.id }}
-
-      - name: Test Meilisearch Connection
-        run: |
-          curl http://localhost:7700/health
-          curl -X GET 'http://localhost:7700/indexes' -H "Authorization: Bearer ${{ secrets.MEILISEARCH_API_KEY }}"
-
     services:
-      meilisearch:
-        image: getmeili/meilisearch:latest
-        ports:
-          - 7700:7700
-        env:
-          MEILI_MASTER_KEY: ${{ secrets.MEILISEARCH_API_KEY }}
-
       meilisync:
-        image: long2ice/meilisync:latest
-        options: >-
-          --mount type=bind,source=${{ github.workspace }}/.github/workflows/config.yml,target=/meilisync/config.yml,readonly
+        image: long2ice/meilisync
+        volumes:
+          - ./config.yml:/meilisync/config.yml
+          
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: "google-github-actions/auth@v2.1.3"
+        with:
+          credentials_json: "${{ secrets.SECRETDELUXE }}"
+
+      - name: "Set up Cloud SDK"
+        uses: "google-github-actions/setup-gcloud@v2"
+
+      - name: "Use gcloud CLI"
+        run: "gcloud info"
+
+      - name: "Set region for Cloud Run"
+        run: "gcloud config set run/region us-central1"
+
+      - name: "Run warehouseapp"
+        run: "gcloud run deploy warehouseapp --source . --allow-unauthenticated"
