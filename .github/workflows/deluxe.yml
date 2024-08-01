@@ -9,9 +9,20 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v4
 
-      # Verify that the workflow directory contains the files we need
-      - name: List Workflow Directory
-        run: ls -al .github/workflows/
+      # Inject secrets into the configuration file
+      - name: Inject secrets into config.yml
+        run: |
+          sed -i 's|YOUR_MEILISEARCH_API_KEY|'"${MEILISEARCH_API_KEY}"'|g' .github/workflows/config.yml
+          sed -i 's|YOUR_POSTGRES_HOST|'"${POSTGRES_HOST}"'|g' .github/workflows/config.yml
+          sed -i 's|YOUR_POSTGRESQL_DATABASE_NAME|'"${POSTGRESQL_DATABASE_NAME}"'|g' .github/workflows/config.yml
+          sed -i 's|YOUR_POSTGRESQL_USERNAME|'"${POSTGRESQL_USERNAME}"'|g' .github/workflows/config.yml
+          sed -i 's|YOUR_POSTGRESQL_PASSWORD|'"${POSTGRESQL_PASSWORD}"'|g' .github/workflows/config.yml
+        env:
+          MEILISEARCH_API_KEY: ${{ secrets.MEILISEARCH_API_KEY }}
+          POSTGRES_HOST: ${{ secrets.POSTGRES_HOST }}
+          POSTGRESQL_DATABASE_NAME: ${{ secrets.POSTGRESQL_DATABASE_NAME }}
+          POSTGRESQL_USERNAME: ${{ secrets.POSTGRESQL_USERNAME }}
+          POSTGRESQL_PASSWORD: ${{ secrets.POSTGRESQL_PASSWORD }}
 
       - name: Authenticate to Google Cloud
         uses: google-github-actions/auth@v2.1.3

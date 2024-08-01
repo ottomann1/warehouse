@@ -1,16 +1,14 @@
 meilisearch:
   api_url: http://host.docker.internal:7700/ # Connection to Meilisearch
-  api_key: '${{ secrets.MEILISEARCH_API_KEY }}'
-  insert_size: 1000
-  insert_interval: 10
+  api_key: "YOUR_MEILISEARCH_API_KEY"        # Placeholder
 
 source:
   type: postgres
-  host: '${{ secrets.POSTGRES_HOST }}'
+  host: "YOUR_POSTGRES_HOST"                 # Placeholder
   port: 5432
-  database: '${{ secrets.POSTGRESQL_DATABASE_NAME }}'
-  user: '${{ secrets.POSTGRESQL_USERNAME }}'
-  password: '${{ secrets.POSTGRESQL_PASSWORD }}'
+  database: "YOUR_POSTGRESQL_DATABASE_NAME"  # Placeholder
+  user: "YOUR_POSTGRESQL_USERNAME"           # Placeholder
+  password: "YOUR_POSTGRESQL_PASSWORD"       # Placeholder
 
 sync:
   - table: car
