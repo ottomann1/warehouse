@@ -11,6 +11,9 @@ jobs:
           
     steps:
       - uses: actions/checkout@v4
+      
+      - name: Verify config.yml exists
+        run: ls -l $GITHUB_WORKSPACE/config.yml
 
       - uses: "google-github-actions/auth@v2.1.3"
         with:
