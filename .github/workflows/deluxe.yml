@@ -5,20 +5,13 @@ on: [push, pull_request]
 jobs:
   build:
     runs-on: ubuntu-latest
+
     services:
-      meilisearch:
-        image: getmeili/meilisearch:latest
-        options: >-
-          --health-cmd="curl --silent --fail http://localhost:7700/health"
-          --health-interval=10s
-          --health-timeout=5s
-          --health-retries=3
-          -e MEILI_MASTER_KEY=${{ secrets.MEILISEARCH_API_KEY }}
-          -p 7700:7700
       meilisync:
-        image: long2ice/meilisync:latest
-        options: >-
-          --mount type=bind,source=${{ github.workspace }}/.github/workflows/config.yml,target=/meilisync/config.yml
+        image: long2ice/meilisync
+        volumes:
+          - ./config.yml:/meilisync/config.yml
+
 
     steps:
       - name: Check out repository
