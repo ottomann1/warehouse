@@ -15,8 +15,8 @@ jobs:
 
       meilisync:
         image: long2ice/meilisync:latest
-        volumes:
-          - ${{ github.workspace }}/.github/workflows/config.yml:/meilisync/config.yml
+        options: >-
+          --mount type=bind,source=${{ github.workspace }}/.github/workflows/config.yml,target=/meilisync/config.yml,readonly
 
     steps:
       - name: Check out repository
