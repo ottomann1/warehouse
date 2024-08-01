@@ -1,8 +1,24 @@
 name: Authenticate to Google Cloud
 on: [push, pull_request]
+
 jobs:
   build:
     runs-on: ubuntu-latest
+    services:
+      meilisearch:
+        image: getmeili/meilisearch:latest
+        options: >-
+          --health-cmd="curl --silent --fail http://localhost:7700/health"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=3
+          -e MEILI_MASTER_KEY=${{ secrets.MEILISEARCH_API_KEY }}
+          -p 7700:7700
+      meilisync:
+        image: long2ice/meilisync:latest
+        options: >-
+          --mount type=bind,source=${{ github.workspace }}/config.yml,target=/meilisync/config.yml
+
     steps:
       - uses: actions/checkout@v4
 
@@ -21,3 +37,14 @@ jobs:
 
       - name: "Run warehouseapp"
         run: "gcloud run deploy warehouseapp --source . --allow-unauthenticated"
+
+      - name: "Check Meilisync Logs"
+        run: "docker logs ${{ job.services.meilisync.id }}"
+
+      - name: "Check Meilisearch Logs"
+        run: "docker logs ${{ job.services.meilisearch.id }}"
+
+      - name: "Test Meilisearch Connection"
+        run: |
+          curl http://localhost:7700/health
+          curl -X GET 'http://localhost:7700/indexes' -H 'Authorization: Bearer ${{ secrets.MEILISEARCH_API_KEY }}'
