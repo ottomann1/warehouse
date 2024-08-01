@@ -20,26 +20,50 @@ router.get("/status", (req: Request, res: Response) => {
 
 router.post("/car", async (req: Request, res: Response) => {
   const newId = req.body.carId;
+  const newModel = req.body.model;
+  const newColor = req.body.color;
+  const newBrand = req.body.brand;
+  const newProdYear = req.body.productionYear;
+  const newPrice = req.body.price;
+  const newPaymentStatus = req.body.paymentStatus;
   const newStatus = "pending";
-  await db.transaction(async (tx) => {
-    logger.info({ message: "warehouse received", newId });
-    const newCar = await tx
-      .insert(carTable)
-      .values({ id: newId, status: newStatus })
-      .returning();
 
-    if (!newCar[0]) {
-      await tx.rollback();
-      logger.error("Failed to insert new car record");
-      return res.sendStatus(500);
-    } else if (newCar[0].status === "pending") {
-      logger.info({ message: "car success", newCar });
-      return res
-        .status(200)
-        .json({ message: "Car record created successfully", newCar });
-    }
-  });
+  try {
+    await db.transaction(async (tx) => {
+      logger.info({ message: "warehouse received", newId });
+
+      const newCar = await tx
+        .insert(carTable)
+        .values({
+          id: newId,
+          status: newStatus,
+          model: newModel,
+          color: newColor,
+          brand: newBrand,
+          productionYear: newProdYear,
+          price: newPrice,
+          paymentStatus: newPaymentStatus,
+        })
+        .returning();
+
+      if (!newCar[0]) {
+        logger.error("Failed to insert new car record");
+        await tx.rollback();
+        return res.sendStatus(500);
+      } else if (newCar[0].status === "pending") {
+        logger.info({ message: "car success", newCar });
+        return res.status(200).json({
+          message: "Car record created successfully",
+          newCar: newCar[0],
+        });
+      }
+    });
+  } catch (error) {
+    logger.error("Transaction error:", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
 });
+
 app.use("/", router);
 
 app.listen(port, () => {
