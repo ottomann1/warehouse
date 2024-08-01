@@ -17,7 +17,7 @@ jobs:
       meilisync:
         image: long2ice/meilisync:latest
         options: >-
-          --mount type=bind,source=${{ github.workspace }}/config.yml,target=/meilisync/config.yml
+          --mount type=bind,source=${{ github.workspace }}/.github/workflows/config.yml,target=/meilisync/config.yml
 
     steps:
       - uses: actions/checkout@v4

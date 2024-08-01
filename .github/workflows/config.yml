@@ -14,10 +14,16 @@ source:
   password: '${{ secrets.POSTGRESQL_PASSWORD }}'
 
 sync:
-  - table: POSTGRES_TABLE_NAME_1
-    index: MEILISEARCH_INDEX_NAME_1
+  - table: car
+    index: car_index
     pk: id
     full: true
-  - table: POSTGRES_TABLE_NAME_2
-    index: MEILISEARCH_INDEX_NAME_2
-    full: true
+    fields:
+      - id
+      - status
+      - model
+      - color
+      - brand
+      - productionYear
+      - price
+      - paymentStatus
