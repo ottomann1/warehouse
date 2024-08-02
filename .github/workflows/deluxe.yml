@@ -3,12 +3,7 @@ on: [push, pull_request]
 jobs:
   build:
     runs-on: ubuntu-latest
-    services:
-      meilisync:
-        image: long2ice/meilisync
-        volumes:
-          - ./config.yml
-          
+
     steps:
       - uses: actions/checkout@v4
 
@@ -25,5 +20,5 @@ jobs:
       - name: "Set region for Cloud Run"
         run: "gcloud config set run/region us-central1"
 
-      - name: "Run warehouseapp"
-        run: "gcloud run deploy warehouseapp --source . --allow-unauthenticated"
+      - name: "Run warehouse-app"
+        run: "gcloud run deploy warehouse-app --source . --allow-unauthenticated"
